@@ -9,14 +9,13 @@ import com.innovation.assignment.member.domain.repository.MemberRepository;
 import com.innovation.assignment.member.domain.vo.Email;
 import com.innovation.assignment.member.domain.vo.Phone;
 import com.innovation.assignment.member.infrastructure.dto.GetMembersResponseDto;
-import com.innovation.assignment.member.presentation.dto.SearchMemberRequestDto;
+import com.innovation.assignment.member.presentation.dto.SearchMemberByEmailRequestDto;
+import com.innovation.assignment.member.presentation.dto.SearchMemberByPhoneRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,8 +44,12 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public GetMembersResponseDto searchMemberByEmail(SearchMemberRequestDto searchMemberRequestDto) {
-        GetMembersResponseDto member = memberRepository.getMemberByEmail(Email.of(searchMemberRequestDto.email()));
+    public GetMembersResponseDto searchMemberByEmail(
+            SearchMemberByEmailRequestDto searchMemberByEmailRequestDto
+    ) {
+        GetMembersResponseDto member = memberRepository.getMemberByEmail(
+                Email.of(searchMemberByEmailRequestDto.email())
+        );
         if (member == null) {
             throw new MemberNotFoundException();
         }
@@ -54,8 +57,12 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public GetMembersResponseDto searchMemberByPhone(SearchMemberRequestDto searchMemberRequestDto) {
-        GetMembersResponseDto member = memberRepository.getMemberByPhone(Phone.of(searchMemberRequestDto.phone()));
+    public GetMembersResponseDto searchMemberByPhone(
+            SearchMemberByPhoneRequestDto searchMemberByPhoneRequestDto
+    ) {
+        GetMembersResponseDto member = memberRepository.getMemberByPhone(
+                Phone.of(searchMemberByPhoneRequestDto.phone())
+        );
         if (member == null) {
             throw new MemberNotFoundException();
         }
