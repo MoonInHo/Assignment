@@ -1,17 +1,19 @@
 package com.innovation.assignment.customer.application.service;
 
-import com.innovation.assignment.exception.exception.DuplicatePhoneException;
-import com.innovation.assignment.exception.exception.customer.*;
 import com.innovation.assignment.customer.application.dto.CreateCustomerRequestDto;
 import com.innovation.assignment.customer.domain.entity.Customer;
 import com.innovation.assignment.customer.domain.repository.CustomerRepository;
-import com.innovation.assignment.customer.domain.vo.Email;
-import com.innovation.assignment.customer.domain.vo.Password;
-import com.innovation.assignment.customer.domain.vo.Phone;
+import com.innovation.assignment.customer.domain.vo.*;
 import com.innovation.assignment.customer.infrastructure.dto.GetCustomerResponseDto;
+import com.innovation.assignment.customer.presentation.dto.ChangeCustomerInfoRequestDto;
 import com.innovation.assignment.customer.presentation.dto.ChangePasswordRequestDto;
 import com.innovation.assignment.customer.presentation.dto.SearchCustomerByEmailRequestDto;
 import com.innovation.assignment.customer.presentation.dto.SearchCustomerByPhoneRequestDto;
+import com.innovation.assignment.exception.exception.DuplicatePhoneException;
+import com.innovation.assignment.exception.exception.customer.CustomerNotFoundException;
+import com.innovation.assignment.exception.exception.customer.DuplicateEmailException;
+import com.innovation.assignment.exception.exception.customer.EmptyCustomerListException;
+import com.innovation.assignment.exception.exception.customer.PasswordConfirmationMismatchException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -72,6 +74,22 @@ public class CustomerService {
         Password encodedNewPassword = password.encodedPassword(passwordEncoder);
 
         customerRepository.changePassword(customerId, encodedNewPassword);
+    }
+
+    @Transactional
+    public void changeCustomerInfo(ChangeCustomerInfoRequestDto changeCustomerInfoRequestDto) {
+
+        Customer customer = customerRepository.getCustomer(changeCustomerInfoRequestDto.customerId())
+                .orElseThrow(CustomerNotFoundException::new);
+
+        customer.modifyCustomerDetails(
+                BirthDate.of(changeCustomerInfoRequestDto.birthDate()),
+                Phone.of(changeCustomerInfoRequestDto.phone()),
+                Address.of(
+                        changeCustomerInfoRequestDto.address(),
+                        changeCustomerInfoRequestDto.addressDetail()
+                )
+        );
     }
 
     @Transactional(readOnly = true)

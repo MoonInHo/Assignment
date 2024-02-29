@@ -4,9 +4,11 @@ import com.innovation.assignment.customer.domain.vo.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
+@DynamicUpdate
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Customer {
 
@@ -58,5 +60,11 @@ public class Customer {
 
     public void passwordEncrypt(PasswordEncoder passwordEncoder) {
         this.password = password.encodedPassword(passwordEncoder);
+    }
+
+    public void modifyCustomerDetails(BirthDate birthDate, Phone phone, Address address) {
+        this.birthDate = birthDate;
+        this.phone = phone;
+        this.address = address;
     }
 }
