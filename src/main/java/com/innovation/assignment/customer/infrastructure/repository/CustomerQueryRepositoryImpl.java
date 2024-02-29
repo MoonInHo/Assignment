@@ -1,5 +1,7 @@
 package com.innovation.assignment.customer.infrastructure.repository;
 
+import com.innovation.assignment.customer.domain.entity.Customer;
+import com.innovation.assignment.customer.domain.entity.QCustomer;
 import com.innovation.assignment.customer.domain.vo.Email;
 import com.innovation.assignment.customer.domain.vo.Phone;
 import com.innovation.assignment.customer.infrastructure.dto.GetCustomerResponseDto;
@@ -112,6 +114,17 @@ public class CustomerQueryRepositoryImpl implements CustomerQueryRepository {
                 )
                 .from(customer)
                 .where(customer.phone.eq(phone))
+                .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
+
+    @Override
+    public Optional<Customer> getCustomer(Long customerId) {
+
+        Customer result = queryFactory
+                .selectFrom(QCustomer.customer)
+                .where(QCustomer.customer.id.eq(customerId))
                 .fetchOne();
 
         return Optional.ofNullable(result);
