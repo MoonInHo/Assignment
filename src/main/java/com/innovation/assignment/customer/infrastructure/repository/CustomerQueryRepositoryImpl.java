@@ -4,7 +4,7 @@ import com.innovation.assignment.customer.domain.entity.Customer;
 import com.innovation.assignment.customer.domain.entity.QCustomer;
 import com.innovation.assignment.customer.domain.vo.Email;
 import com.innovation.assignment.customer.domain.vo.Phone;
-import com.innovation.assignment.customer.infrastructure.dto.GetCustomerResponseDto;
+import com.innovation.assignment.customer.infrastructure.dto.response.GetCustomerResponseDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;

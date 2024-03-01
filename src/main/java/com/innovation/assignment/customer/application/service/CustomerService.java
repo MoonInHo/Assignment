@@ -1,20 +1,17 @@
 package com.innovation.assignment.customer.application.service;
 
-import com.innovation.assignment.customer.application.dto.CreateCustomerRequestDto;
+import com.innovation.assignment.customer.application.dto.request.CreateCustomerRequestDto;
+import com.innovation.assignment.customer.application.event.CustomerHasDeletedEvent;
 import com.innovation.assignment.customer.domain.entity.Customer;
+import com.innovation.assignment.customer.domain.entity.CustomerHistory;
+import com.innovation.assignment.customer.domain.repository.CustomerHistoryRepository;
 import com.innovation.assignment.customer.domain.repository.CustomerRepository;
 import com.innovation.assignment.customer.domain.vo.*;
-import com.innovation.assignment.customer.infrastructure.dto.GetCustomerResponseDto;
-import com.innovation.assignment.customer.presentation.dto.ChangeCustomerInfoRequestDto;
-import com.innovation.assignment.customer.presentation.dto.ChangePasswordRequestDto;
-import com.innovation.assignment.customer.presentation.dto.SearchCustomerByEmailRequestDto;
-import com.innovation.assignment.customer.presentation.dto.SearchCustomerByPhoneRequestDto;
-import com.innovation.assignment.exception.exception.DuplicatePhoneException;
-import com.innovation.assignment.exception.exception.customer.CustomerNotFoundException;
-import com.innovation.assignment.exception.exception.customer.DuplicateEmailException;
-import com.innovation.assignment.exception.exception.customer.EmptyCustomerListException;
-import com.innovation.assignment.exception.exception.customer.PasswordConfirmationMismatchException;
+import com.innovation.assignment.customer.infrastructure.dto.response.GetCustomerResponseDto;
+import com.innovation.assignment.customer.presentation.dto.request.*;
+import com.innovation.assignment.exception.exception.customer.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +24,8 @@ public class CustomerService {
 
     private final PasswordEncoder passwordEncoder;
     private final CustomerRepository customerRepository;
+    private final CustomerHistoryRepository customerHistoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void signUp(CreateCustomerRequestDto createCustomerRequestDto) {
@@ -67,13 +66,14 @@ public class CustomerService {
     @Transactional
     public void changePassword(ChangePasswordRequestDto changePasswordRequestDto) {
 
-        Long customerId = changePasswordRequestDto.customerId();
         validatePasswordConfirmation(changePasswordRequestDto);
 
-        Password password = Password.of(changePasswordRequestDto.newPassword());
-        Password encodedNewPassword = password.encodedPassword(passwordEncoder);
+        Password newPassword = Password.of(changePasswordRequestDto.newPassword());
 
-        customerRepository.changePassword(customerId, encodedNewPassword);
+        Customer customer = customerRepository.getCustomer(changePasswordRequestDto.customerId())
+                .orElseThrow(CustomerNotFoundException::new);
+
+        customer.changePassword(newPassword, passwordEncoder);
     }
 
     @Transactional
@@ -85,11 +85,29 @@ public class CustomerService {
         customer.modifyCustomerDetails(
                 BirthDate.of(changeCustomerInfoRequestDto.birthDate()),
                 Phone.of(changeCustomerInfoRequestDto.phone()),
-                Address.of(
-                        changeCustomerInfoRequestDto.address(),
-                        changeCustomerInfoRequestDto.addressDetail()
-                )
+                Address.of(changeCustomerInfoRequestDto.address(), changeCustomerInfoRequestDto.addressDetail())
         );
+    }
+
+    @Transactional
+    public void deleteCustomer(DeleteCustomerRequestDto deleteCustomerRequestDto) {
+
+        Customer customer = customerRepository.getCustomer(deleteCustomerRequestDto.customerId())
+                .orElseThrow(CustomerNotFoundException::new);
+
+        customerRepository.delete(customer);
+
+        eventPublisher.publishEvent(new CustomerHasDeletedEvent(deleteCustomerRequestDto));
+    }
+
+    @Transactional
+    public void addCustomerHistory(DeleteCustomerRequestDto deleteCustomerRequestDto) {
+
+        CustomerHistory customerHistory = CustomerHistory.createCustomerHistory(
+                deleteCustomerRequestDto.customerId(),
+                WithdrawalReason.of(deleteCustomerRequestDto.withdrawalReason())
+        );
+        customerHistoryRepository.save(customerHistory);
     }
 
     @Transactional(readOnly = true)
