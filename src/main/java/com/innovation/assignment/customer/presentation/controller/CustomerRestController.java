@@ -1,12 +1,9 @@
 package com.innovation.assignment.customer.presentation.controller;
 
-import com.innovation.assignment.customer.application.dto.CreateCustomerRequestDto;
+import com.innovation.assignment.customer.application.dto.request.CreateCustomerRequestDto;
 import com.innovation.assignment.customer.application.service.CustomerService;
-import com.innovation.assignment.customer.infrastructure.dto.GetCustomerResponseDto;
-import com.innovation.assignment.customer.presentation.dto.ChangeCustomerInfoRequestDto;
-import com.innovation.assignment.customer.presentation.dto.ChangePasswordRequestDto;
-import com.innovation.assignment.customer.presentation.dto.SearchCustomerByEmailRequestDto;
-import com.innovation.assignment.customer.presentation.dto.SearchCustomerByPhoneRequestDto;
+import com.innovation.assignment.customer.infrastructure.dto.response.GetCustomerResponseDto;
+import com.innovation.assignment.customer.presentation.dto.request.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,6 +65,14 @@ public class CustomerRestController {
             @RequestBody ChangeCustomerInfoRequestDto changeCustomerInfoRequestDto
     ) {
         customerService.changeCustomerInfo(changeCustomerInfoRequestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteCustomer(
+            @RequestBody DeleteCustomerRequestDto deleteCustomerRequestDto
+    ) {
+        customerService.deleteCustomer(deleteCustomerRequestDto);
         return ResponseEntity.ok().build();
     }
 }

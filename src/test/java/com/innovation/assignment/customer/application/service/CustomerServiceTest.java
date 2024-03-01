@@ -1,14 +1,14 @@
 package com.innovation.assignment.customer.application.service;
 
-import com.innovation.assignment.exception.exception.DuplicatePhoneException;
+import com.innovation.assignment.exception.exception.customer.DuplicatePhoneException;
 import com.innovation.assignment.exception.exception.customer.DuplicateEmailException;
 import com.innovation.assignment.exception.exception.customer.EmptyCustomerListException;
 import com.innovation.assignment.exception.exception.customer.CustomerNotFoundException;
-import com.innovation.assignment.customer.application.dto.CreateCustomerRequestDto;
+import com.innovation.assignment.customer.application.dto.request.CreateCustomerRequestDto;
 import com.innovation.assignment.customer.domain.repository.CustomerRepository;
-import com.innovation.assignment.customer.infrastructure.dto.GetCustomerResponseDto;
-import com.innovation.assignment.customer.presentation.dto.SearchCustomerByEmailRequestDto;
-import com.innovation.assignment.customer.presentation.dto.SearchCustomerByPhoneRequestDto;
+import com.innovation.assignment.customer.infrastructure.dto.response.GetCustomerResponseDto;
+import com.innovation.assignment.customer.presentation.dto.request.SearchCustomerByEmailRequestDto;
+import com.innovation.assignment.customer.presentation.dto.request.SearchCustomerByPhoneRequestDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -218,4 +218,10 @@ class CustomerServiceTest {
         assertThat(customerInfo).isNotNull();
         assertThat(customerInfo.getId()).isEqualTo(1L);
     }
+    //TODO 비밀번호 변경 -> 기존 비밀번호와 같은 문자열로 변경 시도시 예외 발생
+    //TODO 비밀번호 변경 -> 변결할 비밀번호와 비밀번호 확인이 서로 일치하지 않을때 예외 발생
+    //TODO 비밀번호 변경 -> 비밀번호 검증이 끝나면 비밀번호 변경
+    //TODO 고객정보 삭제 -> 해당 식별자를 가진 고객이 없을 경우 예외 발생
+    //TODO 고객정보 삭제 -> 고객 정보가 존재할 경우 고객 정보 삭제
+    //TODO 고객정보 삭제 -> 삭제된 고객 히스토리 생성 여부 검증
 }

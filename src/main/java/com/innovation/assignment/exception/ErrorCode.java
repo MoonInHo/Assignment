@@ -14,7 +14,8 @@ public enum ErrorCode {
     EMPTY_CUSTOMER_LIST("고객 목록이 비어있습니다."),
     CUSTOMER_NOT_FOUND("고객을 찾을 수 없습니다."),
     PASSWORD_MISMATCH("비밀번호가 일치하지 않습니다."),
-    PASSWORD_CONFIRMATION_MISMATCH("변경할 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+    PASSWORD_CONFIRMATION_MISMATCH("변경할 비밀번호와 비밀번호 확인이 일치하지 않습니다."),
+    SAME_PASSWORD("기존 비밀번호와 동일한 비밀번호로 변경할 수 없습니다.");
 
     private final String message;
 

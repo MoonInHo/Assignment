@@ -67,4 +67,8 @@ public class Customer {
         this.phone = phone;
         this.address = address;
     }
+
+    public void changePassword(Password newPassword, PasswordEncoder passwordEncoder) {
+        this.password = password.changePassword(newPassword, passwordEncoder);
+    }
 }

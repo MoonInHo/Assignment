@@ -1,4 +1,4 @@
-package com.innovation.assignment.customer.application.dto;
+package com.innovation.assignment.customer.application.dto.request;
 
 import com.innovation.assignment.customer.domain.entity.Customer;
 import com.innovation.assignment.customer.domain.vo.*;

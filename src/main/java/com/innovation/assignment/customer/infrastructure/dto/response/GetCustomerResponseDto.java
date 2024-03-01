@@ -1,4 +1,4 @@
-package com.innovation.assignment.customer.infrastructure.dto;
+package com.innovation.assignment.customer.infrastructure.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
