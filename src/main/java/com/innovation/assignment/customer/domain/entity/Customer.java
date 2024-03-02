@@ -62,13 +62,17 @@ public class Customer {
         this.password = password.encodedPassword(passwordEncoder);
     }
 
+    public void changePassword(Password newPassword, PasswordEncoder passwordEncoder) {
+        this.password = password.changePassword(newPassword, passwordEncoder);
+    }
+
     public void modifyCustomerDetails(BirthDate birthDate, Phone phone, Address address) {
         this.birthDate = birthDate;
         this.phone = phone;
         this.address = address;
     }
 
-    public void changePassword(Password newPassword, PasswordEncoder passwordEncoder) {
-        this.password = password.changePassword(newPassword, passwordEncoder);
+    public String password() {
+        return password.password();
     }
 }

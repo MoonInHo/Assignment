@@ -40,4 +40,8 @@ public class Password {
     private boolean isMatchesCurrentPassword(Password newPassword, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(newPassword.password, this.password);
     }
+
+    public String password() {
+        return password;
+    }
 }

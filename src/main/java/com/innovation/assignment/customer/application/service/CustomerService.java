@@ -97,7 +97,7 @@ public class CustomerService {
 
         customerRepository.delete(customer);
 
-        eventPublisher.publishEvent(new CustomerHasDeletedEvent(deleteCustomerRequestDto));
+        eventPublisher.publishEvent(new CustomerHasDeletedEvent(deleteCustomerRequestDto)); //TODO 코드에서 예외가 발생할 경우 처리 방안 생각해보기
     }
 
     @Transactional
