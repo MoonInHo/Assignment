@@ -1,17 +1,14 @@
 package com.innovation.assignment.customer.application.service;
 
 import com.innovation.assignment.customer.application.dto.request.CreateCustomerRequestDto;
-import com.innovation.assignment.customer.application.event.CustomerHasDeletedEvent;
 import com.innovation.assignment.customer.domain.entity.Customer;
-import com.innovation.assignment.customer.domain.entity.CustomerHistory;
-import com.innovation.assignment.customer.domain.repository.CustomerHistoryRepository;
 import com.innovation.assignment.customer.domain.repository.CustomerRepository;
 import com.innovation.assignment.customer.domain.vo.*;
 import com.innovation.assignment.customer.infrastructure.dto.response.GetCustomerResponseDto;
-import com.innovation.assignment.customer.presentation.dto.request.*;
-import com.innovation.assignment.exception.exception.customer.*;
+import com.innovation.assignment.customer.presentation.dto.request.ChangeCustomerInfoRequestDto;
+import com.innovation.assignment.customer.presentation.dto.request.ChangePasswordRequestDto;
+import com.innovation.assignment.exception.exceptions.customer.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,8 +21,6 @@ public class CustomerService {
 
     private final PasswordEncoder passwordEncoder;
     private final CustomerRepository customerRepository;
-    private final CustomerHistoryRepository customerHistoryRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void signUp(CreateCustomerRequestDto createCustomerRequestDto) {
@@ -34,7 +29,8 @@ public class CustomerService {
         checkDuplicatePhone(createCustomerRequestDto);
 
         Customer customer = createCustomerRequestDto.toEntity();
-        customer.passwordEncrypt(passwordEncoder);
+        customer.encryptPassword(passwordEncoder);
+
         customerRepository.save(customer);
     }
 
@@ -48,38 +44,32 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public GetCustomerResponseDto searchCustomerByEmail(
-            SearchCustomerByEmailRequestDto searchCustomerByEmailRequestDto
-    ) {
-        return customerRepository.getCustomerByEmail(Email.of(searchCustomerByEmailRequestDto.email()))
-                .orElseThrow(CustomerNotFoundException::new);
-    }
-
-    @Transactional(readOnly = true)
-    public GetCustomerResponseDto searchCustomerByPhone(
-            SearchCustomerByPhoneRequestDto searchCustomerByPhoneRequestDto
-    ) {
-        return customerRepository.getCustomerByPhone(Phone.of(searchCustomerByPhoneRequestDto.phone()))
+    public GetCustomerResponseDto getCustomer(Long customerId) {
+        return customerRepository.getCustomerInfo(customerId)
                 .orElseThrow(CustomerNotFoundException::new);
     }
 
     @Transactional
-    public void changePassword(ChangePasswordRequestDto changePasswordRequestDto) {
-
+    public void changePassword(
+            Long customerId,
+            ChangePasswordRequestDto changePasswordRequestDto
+    ) {
         validatePasswordConfirmation(changePasswordRequestDto);
 
         Password newPassword = Password.of(changePasswordRequestDto.newPassword());
 
-        Customer customer = customerRepository.getCustomer(changePasswordRequestDto.customerId())
-                .orElseThrow(CustomerNotFoundException::new);
-
-        customer.changePassword(newPassword, passwordEncoder);
+        customerRepository.changePassword(
+                customerId,
+                newPassword.encodedPassword(passwordEncoder)
+        );
     }
 
     @Transactional
-    public void changeCustomerInfo(ChangeCustomerInfoRequestDto changeCustomerInfoRequestDto) {
-
-        Customer customer = customerRepository.getCustomer(changeCustomerInfoRequestDto.customerId())
+    public void changeCustomerInfo(
+            Long customerId,
+            ChangeCustomerInfoRequestDto changeCustomerInfoRequestDto
+    ) {
+        Customer customer = customerRepository.getCustomer(customerId)
                 .orElseThrow(CustomerNotFoundException::new);
 
         customer.modifyCustomerDetails(
@@ -90,36 +80,22 @@ public class CustomerService {
     }
 
     @Transactional
-    public void deleteCustomer(DeleteCustomerRequestDto deleteCustomerRequestDto) {
+    public void deleteCustomer(Long customerId) {
 
-        Customer customer = customerRepository.getCustomer(deleteCustomerRequestDto.customerId())
+        Customer customer = customerRepository.getCustomer(customerId)
                 .orElseThrow(CustomerNotFoundException::new);
 
         customerRepository.delete(customer);
-
-        eventPublisher.publishEvent(new CustomerHasDeletedEvent(deleteCustomerRequestDto)); //TODO 코드에서 예외가 발생할 경우 처리 방안 생각해보기
     }
 
-    @Transactional
-    public void addCustomerHistory(DeleteCustomerRequestDto deleteCustomerRequestDto) {
-
-        CustomerHistory customerHistory = CustomerHistory.createCustomerHistory(
-                deleteCustomerRequestDto.customerId(),
-                WithdrawalReason.of(deleteCustomerRequestDto.withdrawalReason())
-        );
-        customerHistoryRepository.save(customerHistory);
-    }
-
-    @Transactional(readOnly = true)
-    protected void checkDuplicateEmail(CreateCustomerRequestDto createCustomerRequestDto) {
+    private void checkDuplicateEmail(CreateCustomerRequestDto createCustomerRequestDto) {
         boolean emailExist = customerRepository.isEmailExist(Email.of(createCustomerRequestDto.getEmail()));
         if (emailExist) {
             throw new DuplicateEmailException();
         }
     }
 
-    @Transactional(readOnly = true)
-    protected void checkDuplicatePhone(CreateCustomerRequestDto createCustomerRequestDto) {
+    private void checkDuplicatePhone(CreateCustomerRequestDto createCustomerRequestDto) {
         boolean phoneExist = customerRepository.isPhoneExist(Phone.of(createCustomerRequestDto.getPhone()));
         if (phoneExist) {
             throw new DuplicatePhoneException();

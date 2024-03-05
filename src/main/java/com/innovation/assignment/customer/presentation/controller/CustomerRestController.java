@@ -3,7 +3,8 @@ package com.innovation.assignment.customer.presentation.controller;
 import com.innovation.assignment.customer.application.dto.request.CreateCustomerRequestDto;
 import com.innovation.assignment.customer.application.service.CustomerService;
 import com.innovation.assignment.customer.infrastructure.dto.response.GetCustomerResponseDto;
-import com.innovation.assignment.customer.presentation.dto.request.*;
+import com.innovation.assignment.customer.presentation.dto.request.ChangeCustomerInfoRequestDto;
+import com.innovation.assignment.customer.presentation.dto.request.ChangePasswordRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,49 +31,38 @@ public class CustomerRestController {
         return ResponseEntity.ok().body(customerService.getCustomers(pageable));
     }
 
-    @PostMapping("/search/email")
-    public ResponseEntity<GetCustomerResponseDto> searchCustomerByEmail(
-            @RequestBody SearchCustomerByEmailRequestDto searchCustomerByEmailRequestDto
+    @GetMapping("/{customerId}")
+    public ResponseEntity<GetCustomerResponseDto> getCustomer(
+            @PathVariable(name = "customerId") Long customerId
     ) {
         return ResponseEntity.ok().body(
-                customerService.searchCustomerByEmail(searchCustomerByEmailRequestDto)
+                customerService.getCustomer(customerId)
         );
     }
 
-    @PostMapping("/search/phone")
-    public ResponseEntity<GetCustomerResponseDto> searchCustomerByPhone(
-            @RequestBody SearchCustomerByPhoneRequestDto searchCustomerByPhoneRequestDto
-    ) {
-        return ResponseEntity.ok().body(
-                customerService.searchCustomerByPhone(searchCustomerByPhoneRequestDto)
-        );
-    }
-
-    /**
-     * 변경전 비밀번호를 히스토리에 저장하여
-     * 기존에 사용했던 비밀번호로 다시 변경 못하게 구현 가능
-     */
-    @PatchMapping("/password")
+    @PatchMapping("/password/{customerId}")
     public ResponseEntity<Void> changePassword(
+            @PathVariable(name = "customerId") Long customerId,
             @RequestBody ChangePasswordRequestDto changePasswordRequestDto
     ) {
-        customerService.changePassword(changePasswordRequestDto);
-        return ResponseEntity.ok().build();
+        customerService.changePassword(customerId, changePasswordRequestDto);
+         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/info")
+    @PatchMapping("/info/{customerId}")
     public ResponseEntity<Void> changeCustomerInfo(
+            @PathVariable(name = "customerId") Long customerId,
             @RequestBody ChangeCustomerInfoRequestDto changeCustomerInfoRequestDto
     ) {
-        customerService.changeCustomerInfo(changeCustomerInfoRequestDto);
+        customerService.changeCustomerInfo(customerId, changeCustomerInfoRequestDto);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{customerId}")
     public ResponseEntity<Void> deleteCustomer(
-            @RequestBody DeleteCustomerRequestDto deleteCustomerRequestDto
+            @PathVariable(name = "customerId") Long customerId
     ) {
-        customerService.deleteCustomer(deleteCustomerRequestDto);
+        customerService.deleteCustomer(customerId);
         return ResponseEntity.ok().build();
     }
 }

@@ -1,4 +1,4 @@
-package com.innovation.assignment.exception.exception.customer;
+package com.innovation.assignment.exception.exceptions.customer;
 
 import com.innovation.assignment.exception.ApplicationException;
 import com.innovation.assignment.exception.ErrorCode;

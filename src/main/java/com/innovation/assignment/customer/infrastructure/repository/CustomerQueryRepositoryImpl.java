@@ -44,6 +44,7 @@ public class CustomerQueryRepositoryImpl implements CustomerQueryRepository {
 
     @Override
     public Page<GetCustomerResponseDto> getCustomers(Pageable pageable) {
+
         List<GetCustomerResponseDto> fetch = queryFactory
                 .select(
                         Projections.fields(
@@ -74,7 +75,7 @@ public class CustomerQueryRepositoryImpl implements CustomerQueryRepository {
     }
 
     @Override
-    public Optional<GetCustomerResponseDto> getCustomerByEmail(Email email) {
+    public Optional<GetCustomerResponseDto> getCustomerInfo(Long customerId) {
 
         GetCustomerResponseDto result = queryFactory
                 .select(
@@ -90,30 +91,7 @@ public class CustomerQueryRepositoryImpl implements CustomerQueryRepository {
                         )
                 )
                 .from(customer)
-                .where(customer.email.eq(email))
-                .fetchOne();
-
-        return Optional.ofNullable(result);
-    }
-
-    @Override
-    public Optional<GetCustomerResponseDto> getCustomerByPhone(Phone phone) {
-
-        GetCustomerResponseDto result = queryFactory
-                .select(
-                        Projections.fields(
-                                GetCustomerResponseDto.class,
-                                customer.id,
-                                customer.email.email,
-                                customer.password.password,
-                                customer.birthDate.birthDate,
-                                customer.phone.phone,
-                                customer.address.address,
-                                customer.address.addressDetail
-                        )
-                )
-                .from(customer)
-                .where(customer.phone.eq(phone))
+                .where(customer.id.eq(customerId))
                 .fetchOne();
 
         return Optional.ofNullable(result);
@@ -122,11 +100,11 @@ public class CustomerQueryRepositoryImpl implements CustomerQueryRepository {
     @Override
     public Optional<Customer> getCustomer(Long customerId) {
 
-        Customer result = queryFactory
+        Customer customer = queryFactory
                 .selectFrom(QCustomer.customer)
                 .where(QCustomer.customer.id.eq(customerId))
                 .fetchOne();
 
-        return Optional.ofNullable(result);
+        return Optional.ofNullable(customer);
     }
 }
