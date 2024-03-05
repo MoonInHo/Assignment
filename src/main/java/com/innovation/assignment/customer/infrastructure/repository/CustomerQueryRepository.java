@@ -17,9 +17,7 @@ public interface CustomerQueryRepository {
 
     Page<GetCustomerResponseDto> getCustomers(Pageable pageable);
 
-    Optional<GetCustomerResponseDto> getCustomerByEmail(Email email);
-
-    Optional<GetCustomerResponseDto> getCustomerByPhone(Phone phone);
+    Optional<GetCustomerResponseDto> getCustomerInfo(Long customerId);
 
     Optional<Customer> getCustomer(Long customerId);
 }

@@ -1,6 +1,5 @@
 package com.innovation.assignment.customer.domain.vo;
 
-import com.innovation.assignment.exception.exception.customer.SamePasswordException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,18 +26,6 @@ public class Password {
 
     public Password encodedPassword(PasswordEncoder passwordEncoder) {
         return new Password(passwordEncoder.encode(password));
-    }
-
-    public Password changePassword(Password newPassword, PasswordEncoder passwordEncoder) {
-        
-        if (isMatchesCurrentPassword(newPassword, passwordEncoder)) {
-            throw new SamePasswordException();
-        }
-        return newPassword.encodedPassword(passwordEncoder);
-    }
-
-    private boolean isMatchesCurrentPassword(Password newPassword, PasswordEncoder passwordEncoder) {
-        return passwordEncoder.matches(newPassword.password, this.password);
     }
 
     public String password() {

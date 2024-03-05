@@ -58,12 +58,8 @@ public class Customer {
         return new Customer(email, password, birthDate, phone, address);
     }
 
-    public void passwordEncrypt(PasswordEncoder passwordEncoder) {
+    public void encryptPassword(PasswordEncoder passwordEncoder) {
         this.password = password.encodedPassword(passwordEncoder);
-    }
-
-    public void changePassword(Password newPassword, PasswordEncoder passwordEncoder) {
-        this.password = password.changePassword(newPassword, passwordEncoder);
     }
 
     public void modifyCustomerDetails(BirthDate birthDate, Phone phone, Address address) {
