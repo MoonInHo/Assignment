@@ -18,7 +18,8 @@ public enum ErrorCode {
     SAME_PASSWORD("기존 비밀번호와 동일한 비밀번호로 변경할 수 없습니다."),
 
     // product
-    DUPLICATE_PRODUCT("이미 존재하는 상품입니다.");
+    DUPLICATE_PRODUCT("이미 존재하는 상품입니다."),
+    EMPTY_PRODUCT_LIST("상품 목록이 비어있습니다.");
 
     private final String message;
 
