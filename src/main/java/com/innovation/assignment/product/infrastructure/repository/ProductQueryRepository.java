@@ -6,11 +6,13 @@ import com.innovation.assignment.product.infrastructure.dto.response.GetProductR
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 public interface ProductQueryRepository {
 
     boolean isProductExist(ProductName productName);
 
-    Page<GetProductResponseDto> getProductsInfo(Pageable pageable);
+    Page<GetProductResponseDto> getProducts(Pageable pageable);
 
-    Page<GetProductResponseDto> getProductsByCategory(Category category, Pageable pageable);
+    Optional<GetProductResponseDto> getProductInfo(Long productId);
 }

@@ -2,6 +2,7 @@ package com.innovation.assignment.product.application.service;
 
 import com.innovation.assignment.exception.exceptions.product.DuplicateProductException;
 import com.innovation.assignment.exception.exceptions.product.EmptyProductListException;
+import com.innovation.assignment.exception.exceptions.product.ProductNotFoundException;
 import com.innovation.assignment.product.application.dto.RegisterProductRequestDto;
 import com.innovation.assignment.product.domain.enums.Category;
 import com.innovation.assignment.product.domain.repository.ProductRepository;
@@ -30,7 +31,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Page<GetProductResponseDto> getProducts(Pageable pageable) {
 
-        Page<GetProductResponseDto> products = productRepository.getProductsInfo(pageable);
+        Page<GetProductResponseDto> products = productRepository.getProducts(pageable);
         if (products.isEmpty()) {
             throw new EmptyProductListException();
         }
@@ -38,14 +39,9 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<GetProductResponseDto> getProductsByCategory(String category, Pageable pageable) {
-
-        Page<GetProductResponseDto> products =
-                productRepository.getProductsByCategory(Category.checkCategory(category), pageable);
-        if (products.isEmpty()) {
-            throw new EmptyProductListException();
-        }
-        return products;
+    public GetProductResponseDto getProduct(Long productId) {
+        return productRepository.getProductInfo(productId)
+                .orElseThrow(ProductNotFoundException::new);
     }
 
     private void checkDuplicateProduct(RegisterProductRequestDto registerProductRequestDto) {

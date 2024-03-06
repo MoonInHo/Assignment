@@ -2,6 +2,7 @@ package com.innovation.assignment.product.application.service;
 
 import com.innovation.assignment.exception.exceptions.product.DuplicateProductException;
 import com.innovation.assignment.exception.exceptions.product.EmptyProductListException;
+import com.innovation.assignment.exception.exceptions.product.ProductNotFoundException;
 import com.innovation.assignment.product.application.dto.RegisterProductRequestDto;
 import com.innovation.assignment.product.domain.enums.Category;
 import com.innovation.assignment.product.domain.repository.ProductRepository;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
@@ -88,7 +90,7 @@ class ProductServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10);
         PageImpl<GetProductResponseDto> emptyPage = new PageImpl<>(emptyProductList, pageRequest, 0);
 
-        given(productRepository.getProductsInfo(any())).willReturn(emptyPage);
+        given(productRepository.getProducts(any())).willReturn(emptyPage);
 
         //when
         Throwable throwable = catchThrowable(() -> productService.getProducts(pageable));
@@ -116,7 +118,7 @@ class ProductServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10);
         PageImpl<GetProductResponseDto> productPage = new PageImpl<>(productList, pageRequest, 2);
 
-        given(productRepository.getProductsInfo(any())).willReturn(productPage);
+        given(productRepository.getProducts(any())).willReturn(productPage);
 
         //when
         Page<GetProductResponseDto> products = productService.getProducts(pageable);
@@ -127,30 +129,23 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품 카테고리 조회 - 비어있는 상품 카테고리 조회시 예외 발생")
-    void emptyProductCategory_getProductsByCategory_throwException() {
+    @DisplayName("상품 조회 - 존재하지 않는 상품 조회시 예외 발생")
+    void nonExistProduct_getProduct_throwException() {
         //given
-        String category = "카테고리1";
-
-        List<GetProductResponseDto> emptyProductList = new ArrayList<>();
-        PageRequest pageRequest = PageRequest.of(0, 10);
-        PageImpl<GetProductResponseDto> emptyPage = new PageImpl<>(emptyProductList, pageRequest, 0);
-
-        given(productRepository.getProductsByCategory(any(), any())).willReturn(emptyPage);
+        given(productRepository.getProductInfo(any())).willReturn(Optional.empty());
 
         //when
-        Throwable throwable = catchThrowable(() -> productService.getProductsByCategory(category, pageable));
+        Throwable throwable = catchThrowable(() -> productService.getProduct(1L));
 
         //then
-        assertThat(throwable).isInstanceOf(EmptyProductListException.class);
-        assertThat(throwable).hasMessage("상품 목록이 비어있습니다.");
+        assertThat(throwable).isInstanceOf(ProductNotFoundException.class);
+        assertThat(throwable).hasMessage("상품을 찾을 수 없습니다.");
     }
 
     @Test
-    @DisplayName("상품 카테고리 조회 - 비어있지 않은 상품 카테고리 조회시 상품 목록 반환")
-    void notEmptyProductCategory_getProductsByCategory_returnProducts() {
+    @DisplayName("상품 조회 - 존재하는 상품 조회시 상품 정보 반환")
+    void existProduct_getProduct_returnProductInfo() {
         //given
-        String category = "카테고리1";
         GetProductResponseDto getProductResponseDto = new GetProductResponseDto(
                 1L,
                 "테스트 상품명",
@@ -159,19 +154,12 @@ class ProductServiceTest {
                 15000,
                 "테스트 상품 코드"
         );
-
-        List<GetProductResponseDto> productList = new ArrayList<>();
-        productList.add(getProductResponseDto);
-        PageRequest pageRequest = PageRequest.of(0, 10);
-        PageImpl<GetProductResponseDto> productPage = new PageImpl<>(productList, pageRequest, 2);
-
-        given(productRepository.getProductsByCategory(any(), any())).willReturn(productPage);
+        given(productRepository.getProductInfo(any())).willReturn(Optional.of(getProductResponseDto));
 
         //when
-        Page<GetProductResponseDto> products = productService.getProductsByCategory(category, pageable);
+        GetProductResponseDto product = productService.getProduct(1L);
 
         //then
-        assertThat(products).isNotEmpty();
-        assertThat(products).hasSize(1);
+        assertThat(product.getId()).isEqualTo(1L);
     }
 }
