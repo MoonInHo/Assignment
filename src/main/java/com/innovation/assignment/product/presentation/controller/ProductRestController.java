@@ -3,6 +3,7 @@ package com.innovation.assignment.product.presentation.controller;
 import com.innovation.assignment.product.application.dto.RegisterProductRequestDto;
 import com.innovation.assignment.product.application.service.ProductService;
 import com.innovation.assignment.product.infrastructure.dto.response.GetProductResponseDto;
+import com.innovation.assignment.product.presentation.dto.request.ModifyProductRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,9 +27,10 @@ public class ProductRestController {
 
     @GetMapping
     public ResponseEntity<Page<GetProductResponseDto>> getProducts(
+            @RequestParam(name = "category", required = false) String category,
             Pageable pageable
     ) {
-        return ResponseEntity.ok().body(productService.getProducts(pageable));
+        return ResponseEntity.ok().body(productService.getProducts(category ,pageable));
     }
 
     @GetMapping("/{productId}")
@@ -36,5 +38,14 @@ public class ProductRestController {
             @PathVariable(name = "productId") Long productId
     ) {
         return ResponseEntity.ok().body(productService.getProduct(productId));
+    }
+
+    @PatchMapping("/{productId}")
+    public ResponseEntity<Void> ModifyProduct(
+            @PathVariable(name = "productId") Long productId,
+            @RequestBody ModifyProductRequestDto modifyProductRequestDto
+    ) {
+        productService.modifyProduct(productId, modifyProductRequestDto);
+        return ResponseEntity.ok().build();
     }
 }
