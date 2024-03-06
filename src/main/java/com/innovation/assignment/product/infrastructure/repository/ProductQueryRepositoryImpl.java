@@ -1,9 +1,12 @@
 package com.innovation.assignment.product.infrastructure.repository;
 
+import com.innovation.assignment.product.domain.entity.Product;
+import com.innovation.assignment.product.domain.entity.QProduct;
 import com.innovation.assignment.product.domain.enums.Category;
 import com.innovation.assignment.product.domain.vo.ProductName;
 import com.innovation.assignment.product.infrastructure.dto.response.GetProductResponseDto;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,7 +35,7 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
     }
 
     @Override
-    public Page<GetProductResponseDto> getProducts(Pageable pageable) {
+    public Page<GetProductResponseDto> getProducts(Category category, Pageable pageable) {
 
         List<GetProductResponseDto> fetch = queryFactory
                 .select(
@@ -47,12 +50,14 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
                         )
                 )
                 .from(product)
+                .where(isContainsCategory(category))
                 .fetch();
 
         Long totalCount = Optional.ofNullable(
                 queryFactory
                 .select(product.count())
                 .from(product)
+                .where(isContainsCategory(category))
                 .fetchOne()
         ).orElse(0L);
 
@@ -79,5 +84,23 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
                 .fetchOne();
 
         return Optional.ofNullable(result);
+    }
+
+    @Override
+    public Optional<Product> getProduct(Long productId) {
+
+        Product product = queryFactory
+                .selectFrom(QProduct.product)
+                .where(QProduct.product.id.eq(productId))
+                .fetchOne();
+
+        return Optional.ofNullable(product);
+    }
+
+    private BooleanExpression isContainsCategory(Category category) {
+        if (category == null) {
+            return null;
+        }
+        return product.category.eq(category);
     }
 }

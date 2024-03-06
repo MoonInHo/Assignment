@@ -33,10 +33,10 @@ import static org.mockito.Mockito.verify;
 @DisplayName("[유닛 테스트] - 상품 서비스")
 class ProductServiceTest {
 
+    private Pageable pageable;
+
     @Mock
     private ProductRepository productRepository;
-
-    private Pageable pageable;
 
     @InjectMocks
     private ProductService productService;
@@ -86,14 +86,15 @@ class ProductServiceTest {
     @DisplayName("상품 목록 조회 - 비어있는 상품 목록 조회시 예외 발생")
     void emptyProductList_getProducts_throwException() {
         //given
+        String category = "카테고리1";
         List<GetProductResponseDto> emptyProductList = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(0, 10);
         PageImpl<GetProductResponseDto> emptyPage = new PageImpl<>(emptyProductList, pageRequest, 0);
 
-        given(productRepository.getProducts(any())).willReturn(emptyPage);
+        given(productRepository.getProducts(any(), any())).willReturn(emptyPage);
 
         //when
-        Throwable throwable = catchThrowable(() -> productService.getProducts(pageable));
+        Throwable throwable = catchThrowable(() -> productService.getProducts(category, pageable));
 
         //then
         assertThat(throwable).isInstanceOf(EmptyProductListException.class);
@@ -104,6 +105,7 @@ class ProductServiceTest {
     @DisplayName("상품 목록 조회 - 비어있지 않은 상품 목록 조회시 상품 목록 반환")
     void notEmptyProductList_getProducts_returnProducts() {
         //given
+        String category = "카테고리1";
         GetProductResponseDto getProductResponseDto = new GetProductResponseDto(
                 1L,
                 "테스트 상품명",
@@ -118,10 +120,10 @@ class ProductServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10);
         PageImpl<GetProductResponseDto> productPage = new PageImpl<>(productList, pageRequest, 2);
 
-        given(productRepository.getProducts(any())).willReturn(productPage);
+        given(productRepository.getProducts(any(), any())).willReturn(productPage);
 
         //when
-        Page<GetProductResponseDto> products = productService.getProducts(pageable);
+        Page<GetProductResponseDto> products = productService.getProducts(category, pageable);
 
         //then
         assertThat(products).isNotEmpty();
