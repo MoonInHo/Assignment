@@ -4,9 +4,14 @@ import com.innovation.assignment.exception.exceptions.product.DuplicateProductEx
 import com.innovation.assignment.exception.exceptions.product.EmptyProductListException;
 import com.innovation.assignment.exception.exceptions.product.ProductNotFoundException;
 import com.innovation.assignment.product.application.dto.RegisterProductRequestDto;
+import com.innovation.assignment.product.domain.entity.Product;
 import com.innovation.assignment.product.domain.enums.Category;
 import com.innovation.assignment.product.domain.repository.ProductRepository;
+import com.innovation.assignment.product.domain.vo.Price;
+import com.innovation.assignment.product.domain.vo.ProductName;
+import com.innovation.assignment.product.domain.vo.Quantity;
 import com.innovation.assignment.product.infrastructure.dto.response.GetProductResponseDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,23 +40,28 @@ class ProductServiceTest {
 
     private Pageable pageable;
 
+    private RegisterProductRequestDto registerProductRequestDto;
+
     @Mock
     private ProductRepository productRepository;
 
     @InjectMocks
     private ProductService productService;
 
-    @Test
-    @DisplayName("상품 등록 - 이미 존재하는 상품 등록시 예외 발생")
-    void existProduct_registerProduct_throwException() {
-        //given
-        RegisterProductRequestDto registerProductRequestDto = new RegisterProductRequestDto(
+    @BeforeEach
+    void setProductInfo() {
+        registerProductRequestDto = new RegisterProductRequestDto(
                 "중복된 상품명",
                 "카테고리1",
                 200,
                 15000
         );
+    }
 
+    @Test
+    @DisplayName("상품 등록 - 이미 존재하는 상품 등록시 예외 발생")
+    void existProduct_registerProduct_throwException() {
+        //given
         given(productRepository.isProductExist(any())).willReturn(true);
 
         //when
@@ -66,13 +76,6 @@ class ProductServiceTest {
     @DisplayName("상품 등록 - 올바른 정보로 상품 등록시 상품 저장")
     void properProductInfo_registerProduct_saveProductInfo() {
         //given
-        RegisterProductRequestDto registerProductRequestDto = new RegisterProductRequestDto(
-                "올바른 상품명",
-                "카테고리1",
-                200,
-                15000
-        );
-
         given(productRepository.isProductExist(any())).willReturn(false);
 
         //when
@@ -163,5 +166,19 @@ class ProductServiceTest {
 
         //then
         assertThat(product.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("상품 삭제 - 존재하는 상품 번호로 상품 삭제시 상품 삭제")
+    void existProductId_deleteProduct_deleteProduct() {
+        //given
+        Product product = registerProductRequestDto.toEntity();
+        given(productRepository.getProduct(1L)).willReturn(Optional.ofNullable(product));
+
+        //when
+        productService.deleteProduct(1L);
+
+        //then
+        verify(productRepository, times(1)).delete(product);
     }
 }

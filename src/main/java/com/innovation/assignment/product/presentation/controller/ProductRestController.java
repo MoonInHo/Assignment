@@ -48,4 +48,12 @@ public class ProductRestController {
         productService.modifyProduct(productId, modifyProductRequestDto);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> deleteProduct(
+            @PathVariable(name = "productId") Long productId
+    ) {
+        productService.deleteProduct(productId);
+        return ResponseEntity.ok().build();
+    }
 }
