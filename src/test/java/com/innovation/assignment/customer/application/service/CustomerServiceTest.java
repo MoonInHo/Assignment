@@ -6,6 +6,7 @@ import com.innovation.assignment.customer.domain.repository.CustomerRepository;
 import com.innovation.assignment.customer.domain.vo.Password;
 import com.innovation.assignment.customer.infrastructure.dto.response.GetCustomerResponseDto;
 import com.innovation.assignment.customer.presentation.dto.request.ChangePasswordRequestDto;
+import com.innovation.assignment.exception.exceptions.customer.CustomerNotFoundException;
 import com.innovation.assignment.exception.exceptions.customer.DuplicateEmailException;
 import com.innovation.assignment.exception.exceptions.customer.DuplicatePhoneException;
 import com.innovation.assignment.exception.exceptions.customer.EmptyCustomerListException;
@@ -34,14 +35,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("[유닛 테스트] - 회원 서비스")
+@DisplayName("[유닛 테스트] - 고객 서비스")
 class CustomerServiceTest {
 
     private CreateCustomerRequestDto createCustomerRequestDto;
 
     private GetCustomerResponseDto getCustomerResponseDto;
 
-    @Mock
     private Pageable pageable;
 
     @Mock
@@ -104,7 +104,7 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("회원 가입 - 올바른 정보로 회원가입 시도시 사용자 정보 저장")
+    @DisplayName(" - 올바른 정보로 회원가입 시도시 사용자 정보 저장")
     void properInfo_signUp_saveUserInfo() {
         //given
         given(customerRepository.isEmailExist(any())).willReturn(false);
@@ -118,8 +118,8 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("회원 목록 조회 - 비어있는 회원 목록 조회시 예외 발생")
-    void RetrieveEmptyCustomerList_throwException() {
+    @DisplayName("고객 목록 조회 - 비어있는 고객 목록 조회시 예외 발생")
+    void getEmptyCustomerList_throwException() {
         //given & when
         List<GetCustomerResponseDto> emptyCustomerList = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(0, 10);
@@ -134,8 +134,8 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("회원 목록 조회 - 비어있지 않은 회원 목록 조회시 회원 목록 반환")
-    void notEmptyCustomerList_retrieve_returnCustomerList() {
+    @DisplayName("고객 목록 조회 - 비어있지 않은 고객 목록 조회시 고객 목록 반환")
+    void notEmptyCustomerList_getCustomerList_returnCustomerList() {
         //given
         List<GetCustomerResponseDto> customerList = new ArrayList<>();
         customerList.add(getCustomerResponseDto);
@@ -153,6 +153,32 @@ class CustomerServiceTest {
     }
 
     //TODO 회원 조회 테스트 코드 추가
+    @Test
+    @DisplayName("고객 조회 - 존재하지 않는 고객 조회시 예외 발생")
+    void nonExistCustomer_getCustomer_throwException() {
+        //given
+        given(customerRepository.getCustomerInfo(any())).willReturn(Optional.empty());
+
+        //when
+        Throwable throwable = catchThrowable(() -> customerService.getCustomer(1L));
+
+        //then
+        assertThat(throwable).isInstanceOf(CustomerNotFoundException.class);
+        assertThat(throwable).hasMessage("고객을 찾을 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("고객 조회 - 존재하는 고객 조회시 고객 정보 반환")
+    void existCustomer_getCustomer_returnCustomerInfo() {
+        //given
+        given(customerRepository.getCustomerInfo(any())).willReturn(Optional.ofNullable(getCustomerResponseDto));
+
+        //when
+        GetCustomerResponseDto customer = customerService.getCustomer(1L);
+
+        //then
+        assertThat(customer.getId()).isEqualTo(1L);
+    }
 
     @Test
     @DisplayName("비밀번호 변경 - 올바른 비밀번호로 비밀번호 변경 시도시 비밀번호 업데이트")
