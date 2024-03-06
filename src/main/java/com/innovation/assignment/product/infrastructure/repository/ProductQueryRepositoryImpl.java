@@ -32,7 +32,7 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
     }
 
     @Override
-    public Page<GetProductResponseDto> getProductsInfo(Pageable pageable) {
+    public Page<GetProductResponseDto> getProducts(Pageable pageable) {
 
         List<GetProductResponseDto> fetch = queryFactory
                 .select(
@@ -60,9 +60,9 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
     }
 
     @Override
-    public Page<GetProductResponseDto> getProductsByCategory(Category category, Pageable pageable) {
+    public Optional<GetProductResponseDto> getProductInfo(Long productId) {
 
-        List<GetProductResponseDto> fetch = queryFactory
+        GetProductResponseDto result = queryFactory
                 .select(
                         Projections.fields(
                                 GetProductResponseDto.class,
@@ -75,17 +75,9 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
                         )
                 )
                 .from(product)
-                .where(product.category.eq(category))
-                .fetch();
+                .where(product.id.eq(productId))
+                .fetchOne();
 
-        Long totalCount = Optional.ofNullable(
-                queryFactory
-                        .select(product.count())
-                        .from(product)
-                        .where(product.category.eq(category))
-                        .fetchOne()
-        ).orElse(0L);
-
-        return new PageImpl<>(fetch, pageable, totalCount);
+        return Optional.ofNullable(result);
     }
 }

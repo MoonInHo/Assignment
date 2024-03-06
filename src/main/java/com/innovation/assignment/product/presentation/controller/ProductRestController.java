@@ -31,11 +31,10 @@ public class ProductRestController {
         return ResponseEntity.ok().body(productService.getProducts(pageable));
     }
 
-    @GetMapping("/{category}")
-    public ResponseEntity<Page<GetProductResponseDto>> getProductsByCategory(
-            @PathVariable("category") String category,
-            Pageable pageable
+    @GetMapping("/{productId}")
+    public ResponseEntity<GetProductResponseDto> getProduct(
+            @PathVariable(name = "productId") Long productId
     ) {
-        return ResponseEntity.ok().body(productService.getProductsByCategory(category, pageable));
+        return ResponseEntity.ok().body(productService.getProduct(productId));
     }
 }
