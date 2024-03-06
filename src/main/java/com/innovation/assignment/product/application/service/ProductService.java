@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -60,6 +62,15 @@ public class ProductService {
                 Quantity.of(modifyProductRequestDto.quantity()),
                 Price.of(modifyProductRequestDto.price())
         );
+    }
+
+    @Transactional
+    public void deleteProduct(Long productId) {
+
+        Product product = productRepository.getProduct(productId)
+                .orElseThrow(ProductNotFoundException::new);
+
+        productRepository.delete(product);
     }
 
     private void checkDuplicateProduct(RegisterProductRequestDto registerProductRequestDto) {
