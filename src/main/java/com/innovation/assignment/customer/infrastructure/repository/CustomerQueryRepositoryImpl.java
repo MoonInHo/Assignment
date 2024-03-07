@@ -74,8 +74,7 @@ public class CustomerQueryRepositoryImpl implements CustomerQueryRepository {
         return new PageImpl<>(fetch, pageable, totalCount);
     }
 
-    @Override
-    public Optional<GetCustomerResponseDto> getCustomerInfo(Long customerId) {
+    public Optional<GetCustomerResponseDto> getCustomer(Long customerId) {
 
         GetCustomerResponseDto result = queryFactory
                 .select(
@@ -95,16 +94,5 @@ public class CustomerQueryRepositoryImpl implements CustomerQueryRepository {
                 .fetchOne();
 
         return Optional.ofNullable(result);
-    }
-
-    @Override
-    public Optional<Customer> getCustomer(Long customerId) {
-
-        Customer customer = queryFactory
-                .selectFrom(QCustomer.customer)
-                .where(QCustomer.customer.id.eq(customerId))
-                .fetchOne();
-
-        return Optional.ofNullable(customer);
     }
 }

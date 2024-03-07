@@ -1,6 +1,5 @@
 package com.innovation.assignment.customer.infrastructure.repository;
 
-import com.innovation.assignment.customer.domain.entity.Customer;
 import com.innovation.assignment.customer.domain.vo.Email;
 import com.innovation.assignment.customer.domain.vo.Phone;
 import com.innovation.assignment.customer.infrastructure.dto.response.GetCustomerResponseDto;
@@ -17,7 +16,5 @@ public interface CustomerQueryRepository {
 
     Page<GetCustomerResponseDto> getCustomers(Pageable pageable);
 
-    Optional<GetCustomerResponseDto> getCustomerInfo(Long customerId);
-
-    Optional<Customer> getCustomer(Long customerId);
+    Optional<GetCustomerResponseDto> getCustomer(Long customerId);
 }

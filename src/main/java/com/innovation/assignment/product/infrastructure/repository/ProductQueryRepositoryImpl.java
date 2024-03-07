@@ -64,8 +64,7 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
         return new PageImpl<>(fetch, pageable, totalCount);
     }
 
-    @Override
-    public Optional<GetProductResponseDto> getProductInfo(Long productId) {
+    public Optional<GetProductResponseDto> getProduct(Long productId) {
 
         GetProductResponseDto result = queryFactory
                 .select(
@@ -84,17 +83,6 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
                 .fetchOne();
 
         return Optional.ofNullable(result);
-    }
-
-    @Override
-    public Optional<Product> getProduct(Long productId) {
-
-        Product product = queryFactory
-                .selectFrom(QProduct.product)
-                .where(QProduct.product.id.eq(productId))
-                .fetchOne();
-
-        return Optional.ofNullable(product);
     }
 
     private BooleanExpression isContainsCategory(Category category) {

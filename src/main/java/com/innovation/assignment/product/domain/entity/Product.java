@@ -8,10 +8,8 @@ import com.innovation.assignment.product.domain.vo.Quantity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
-@DynamicUpdate
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product {
 
@@ -59,12 +57,5 @@ public class Product {
             Price price
     ) {
         return new Product(productName, category, quantity, price);
-    }
-
-    public void modifyProductInfo(ProductName productName, Category category, Quantity quantity, Price price) {
-        this.productName = productName;
-        this.category = category;
-        this.quantity = quantity;
-        this.price = price;
     }
 }

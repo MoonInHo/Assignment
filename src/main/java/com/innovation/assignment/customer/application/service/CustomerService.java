@@ -45,7 +45,7 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public GetCustomerResponseDto getCustomer(Long customerId) {
-        return customerRepository.getCustomerInfo(customerId)
+        return customerRepository.getCustomer(customerId)
                 .orElseThrow(CustomerNotFoundException::new);
     }
 
@@ -54,6 +54,7 @@ public class CustomerService {
             Long customerId,
             ChangePasswordRequestDto changePasswordRequestDto
     ) {
+        checkCustomerExist(customerId);
         validatePasswordConfirmation(changePasswordRequestDto);
 
         Password newPassword = Password.of(changePasswordRequestDto.newPassword());
@@ -65,14 +66,14 @@ public class CustomerService {
     }
 
     @Transactional
-    public void changeCustomerInfo(
+    public void modifyDetails(
             Long customerId,
             ChangeCustomerInfoRequestDto changeCustomerInfoRequestDto
     ) {
-        Customer customer = customerRepository.getCustomer(customerId)
-                .orElseThrow(CustomerNotFoundException::new);
+        checkCustomerExist(customerId);
 
-        customer.modifyCustomerDetails(
+        customerRepository.modifyDetails(
+                customerId,
                 BirthDate.of(changeCustomerInfoRequestDto.birthDate()),
                 Phone.of(changeCustomerInfoRequestDto.phone()),
                 Address.of(changeCustomerInfoRequestDto.address(), changeCustomerInfoRequestDto.addressDetail())
@@ -82,10 +83,9 @@ public class CustomerService {
     @Transactional
     public void deleteCustomer(Long customerId) {
 
-        Customer customer = customerRepository.getCustomer(customerId)
-                .orElseThrow(CustomerNotFoundException::new);
+        checkCustomerExist(customerId);
 
-        customerRepository.delete(customer);
+        customerRepository.deleteById(customerId);
     }
 
     private void checkDuplicateEmail(CreateCustomerRequestDto createCustomerRequestDto) {
@@ -107,6 +107,13 @@ public class CustomerService {
         String confirmNewPassword = changePasswordRequestDto.confirmNewPassword();
         if (!newPassword.equals(confirmNewPassword)) {
             throw new PasswordConfirmationMismatchException();
+        }
+    }
+
+    private void checkCustomerExist(Long customerId) {
+        boolean customerIdExist = customerRepository.existsById(customerId);
+        if (!customerIdExist) {
+            throw new CustomerNotFoundException();
         }
     }
 }
