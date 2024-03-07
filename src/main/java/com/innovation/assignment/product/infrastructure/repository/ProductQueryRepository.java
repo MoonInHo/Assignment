@@ -1,6 +1,5 @@
 package com.innovation.assignment.product.infrastructure.repository;
 
-import com.innovation.assignment.product.domain.entity.Product;
 import com.innovation.assignment.product.domain.enums.Category;
 import com.innovation.assignment.product.domain.vo.ProductName;
 import com.innovation.assignment.product.infrastructure.dto.response.GetProductResponseDto;
@@ -15,7 +14,5 @@ public interface ProductQueryRepository {
 
     Page<GetProductResponseDto> getProducts(Category category, Pageable pageable);
 
-    Optional<GetProductResponseDto> getProductInfo(Long productId);
-
-    Optional<Product> getProduct(Long productId);
+    Optional<GetProductResponseDto> getProduct(Long productId);
 }

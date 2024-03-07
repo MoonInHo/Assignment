@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/customers")
 public class CustomerRestController {
 
-    private final CustomerService customerService; // 규모 확장시 각 역할별로 service 클래스 분할
+    private final CustomerService customerService;
 
     @PostMapping
     public ResponseEntity<Void> createCustomer(
@@ -40,7 +40,7 @@ public class CustomerRestController {
         );
     }
 
-    @PatchMapping("/password/{customerId}")
+    @PatchMapping("/{customerId}/password")
     public ResponseEntity<Void> changePassword(
             @PathVariable(name = "customerId") Long customerId,
             @RequestBody ChangePasswordRequestDto changePasswordRequestDto
@@ -49,12 +49,12 @@ public class CustomerRestController {
          return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/info/{customerId}")
-    public ResponseEntity<Void> changeCustomerInfo(
+    @PatchMapping("/{customerId}/info")
+    public ResponseEntity<Void> modifyDetails(
             @PathVariable(name = "customerId") Long customerId,
             @RequestBody ChangeCustomerInfoRequestDto changeCustomerInfoRequestDto
     ) {
-        customerService.changeCustomerInfo(customerId, changeCustomerInfoRequestDto);
+        customerService.modifyDetails(customerId, changeCustomerInfoRequestDto);
         return ResponseEntity.ok().build();
     }
 

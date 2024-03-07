@@ -1,10 +1,9 @@
 package com.innovation.assignment.customer.application.service;
 
 import com.innovation.assignment.customer.application.dto.request.CreateCustomerRequestDto;
-import com.innovation.assignment.customer.domain.entity.Customer;
 import com.innovation.assignment.customer.domain.repository.CustomerRepository;
-import com.innovation.assignment.customer.domain.vo.Password;
 import com.innovation.assignment.customer.infrastructure.dto.response.GetCustomerResponseDto;
+import com.innovation.assignment.customer.presentation.dto.request.ChangeCustomerInfoRequestDto;
 import com.innovation.assignment.customer.presentation.dto.request.ChangePasswordRequestDto;
 import com.innovation.assignment.exception.exceptions.customer.CustomerNotFoundException;
 import com.innovation.assignment.exception.exceptions.customer.DuplicateEmailException;
@@ -152,12 +151,11 @@ class CustomerServiceTest {
         assertThat(customers).hasSize(1);
     }
 
-    //TODO 회원 조회 테스트 코드 추가
     @Test
     @DisplayName("고객 조회 - 존재하지 않는 고객 조회시 예외 발생")
     void nonExistCustomer_getCustomer_throwException() {
         //given
-        given(customerRepository.getCustomerInfo(any())).willReturn(Optional.empty());
+        given(customerRepository.getCustomer(any())).willReturn(Optional.empty());
 
         //when
         Throwable throwable = catchThrowable(() -> customerService.getCustomer(1L));
@@ -171,7 +169,7 @@ class CustomerServiceTest {
     @DisplayName("고객 조회 - 존재하는 고객 조회시 고객 정보 반환")
     void existCustomer_getCustomer_returnCustomerInfo() {
         //given
-        given(customerRepository.getCustomerInfo(any())).willReturn(Optional.ofNullable(getCustomerResponseDto));
+        given(customerRepository.getCustomer(any())).willReturn(Optional.ofNullable(getCustomerResponseDto));
 
         //when
         GetCustomerResponseDto customer = customerService.getCustomer(1L);
@@ -185,12 +183,11 @@ class CustomerServiceTest {
     void properNewPassword_changePassword_updatePassword() {
         //given
         Long customerId = 1L;
-        Password changedPassword = Password.of("changedPassword123!");
         ChangePasswordRequestDto changePasswordRequestDto = new ChangePasswordRequestDto(
                 "newPassword123!",
                 "newPassword123!"
         );
-        given(passwordEncoder.encode(changePasswordRequestDto.newPassword())).willReturn(any());
+        given(customerRepository.existsById(customerId)).willReturn(true);
 
         //when
         customerService.changePassword(customerId, changePasswordRequestDto);
@@ -200,18 +197,37 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("고객 정보 삭제 - 존재하는 고객의 id로 고객 정보 삭제 시도시 고객정보 삭제")
-    void existCustomerId_deleteCustomerInfo_deleteCustomerInfoAnd() { //TODO 비동기 이벤트 테스트 고민
+    @DisplayName("고객 정보 변경 - 올바른 정보로 고객 정보 변경 시도시 고객 정보 업데이트")
+    void properCustomerInfo_modifyCustomerInfo_updateCustomerInfo() {
         //given
-        Customer customer = createCustomerRequestDto.toEntity();
+        Long customerId = 1L;
+        ChangeCustomerInfoRequestDto changeCustomerInfoRequestDto = new ChangeCustomerInfoRequestDto(
+                "1995.11.20",
+                "010-1234-5678",
+                "변경된 주소",
+                "변경된 상세 주소"
+        );
+        given(customerRepository.existsById(customerId)).willReturn(true);
+
+        //when
+        customerService.modifyDetails(customerId, changeCustomerInfoRequestDto);
+
+        //then
+        verify(customerRepository, times(1)).modifyDetails(any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("고객 정보 삭제 - 존재하는 고객의 id로 고객 정보 삭제 시도시 고객정보 삭제")
+    void existCustomerId_deleteCustomerInfo_deleteCustomerInfoAnd() {
+        //given
         Long customerId = 1L;
 
-        given(customerRepository.getCustomer(any())).willReturn(Optional.ofNullable(customer));
+        given(customerRepository.existsById(customerId)).willReturn(true);
 
         //when
         customerService.deleteCustomer(customerId);
 
         //then
-        verify(customerRepository, times(1)).delete(any());
+        verify(customerRepository, times(1)).deleteById(customerId);
     }
 }

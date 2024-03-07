@@ -4,13 +4,10 @@ import com.innovation.assignment.exception.exceptions.product.DuplicateProductEx
 import com.innovation.assignment.exception.exceptions.product.EmptyProductListException;
 import com.innovation.assignment.exception.exceptions.product.ProductNotFoundException;
 import com.innovation.assignment.product.application.dto.RegisterProductRequestDto;
-import com.innovation.assignment.product.domain.entity.Product;
 import com.innovation.assignment.product.domain.enums.Category;
 import com.innovation.assignment.product.domain.repository.ProductRepository;
-import com.innovation.assignment.product.domain.vo.Price;
-import com.innovation.assignment.product.domain.vo.ProductName;
-import com.innovation.assignment.product.domain.vo.Quantity;
 import com.innovation.assignment.product.infrastructure.dto.response.GetProductResponseDto;
+import com.innovation.assignment.product.presentation.dto.request.ModifyProductRequestDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -137,7 +134,7 @@ class ProductServiceTest {
     @DisplayName("상품 조회 - 존재하지 않는 상품 조회시 예외 발생")
     void nonExistProduct_getProduct_throwException() {
         //given
-        given(productRepository.getProductInfo(any())).willReturn(Optional.empty());
+        given(productRepository.getProduct(any())).willReturn(Optional.empty());
 
         //when
         Throwable throwable = catchThrowable(() -> productService.getProduct(1L));
@@ -159,7 +156,7 @@ class ProductServiceTest {
                 15000,
                 "테스트 상품 코드"
         );
-        given(productRepository.getProductInfo(any())).willReturn(Optional.of(getProductResponseDto));
+        given(productRepository.getProduct(any())).willReturn(Optional.of(getProductResponseDto));
 
         //when
         GetProductResponseDto product = productService.getProduct(1L);
@@ -169,16 +166,44 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("상품 정보 변경 - 올바른 정보르 상품 정보 변경 시도시 상품 정보 업데이트")
+    void properProductInfo_modifyProductInfo_updateProductInfo() {
+        //given
+        Long productId = 1L;
+        ModifyProductRequestDto modifyProductRequestDto = new ModifyProductRequestDto(
+                "변경된 상품명",
+                "카테고리1",
+                10,
+                25000
+        );
+        given(productRepository.existsById(productId)).willReturn(true);
+
+        //when
+        productService.modifyProduct(productId, modifyProductRequestDto);
+
+        //then
+        verify(productRepository, times(1)).modifyInfo(any(), any(), any(), any(), any());
+    }
+
+    @Test
     @DisplayName("상품 삭제 - 존재하는 상품 번호로 상품 삭제시 상품 삭제")
     void existProductId_deleteProduct_deleteProduct() {
         //given
-        Product product = registerProductRequestDto.toEntity();
-        given(productRepository.getProduct(1L)).willReturn(Optional.ofNullable(product));
+        Long customerId = 1L;
+        GetProductResponseDto getProductResponseDto = new GetProductResponseDto(
+                1L,
+                "테스트 상품명",
+                Category.checkCategory("카테고리1"),
+                10,
+                20000,
+                "테스트 상품 코드"
+        );
+        given(productRepository.existsById(customerId)).willReturn(true);
 
         //when
-        productService.deleteProduct(1L);
+        productService.deleteProduct(customerId);
 
         //then
-        verify(productRepository, times(1)).delete(product);
+        verify(productRepository, times(1)).deleteById(customerId);
     }
 }

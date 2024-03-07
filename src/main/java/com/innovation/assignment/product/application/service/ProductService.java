@@ -4,7 +4,6 @@ import com.innovation.assignment.exception.exceptions.product.DuplicateProductEx
 import com.innovation.assignment.exception.exceptions.product.EmptyProductListException;
 import com.innovation.assignment.exception.exceptions.product.ProductNotFoundException;
 import com.innovation.assignment.product.application.dto.RegisterProductRequestDto;
-import com.innovation.assignment.product.domain.entity.Product;
 import com.innovation.assignment.product.domain.enums.Category;
 import com.innovation.assignment.product.domain.repository.ProductRepository;
 import com.innovation.assignment.product.domain.vo.Price;
@@ -17,8 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,17 +43,17 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public GetProductResponseDto getProduct(Long productId) {
-        return productRepository.getProductInfo(productId)
+        return productRepository.getProduct(productId)
                 .orElseThrow(ProductNotFoundException::new);
     }
 
     @Transactional
     public void modifyProduct(Long productId, ModifyProductRequestDto modifyProductRequestDto) {
 
-        Product product = productRepository.getProduct(productId)
-                .orElseThrow(ProductNotFoundException::new);
+        checkProductExist(productId);
 
-        product.modifyProductInfo( //TODO update 쿼리 직접 사용하는 방법 고민
+        productRepository.modifyInfo(
+                productId,
                 ProductName.of(modifyProductRequestDto.productName()),
                 Category.checkCategory(modifyProductRequestDto.category()),
                 Quantity.of(modifyProductRequestDto.quantity()),
@@ -67,10 +64,9 @@ public class ProductService {
     @Transactional
     public void deleteProduct(Long productId) {
 
-        Product product = productRepository.getProduct(productId)
-                .orElseThrow(ProductNotFoundException::new);
+        checkProductExist(productId);
 
-        productRepository.delete(product);
+        productRepository.deleteById(productId); //TODO delete 쿼리를 직접 작성하는 방법 고민
     }
 
     private void checkDuplicateProduct(RegisterProductRequestDto registerProductRequestDto) {
@@ -85,5 +81,12 @@ public class ProductService {
             return null;
         }
         return Category.checkCategory(category);
+    }
+
+    private void checkProductExist(Long productId) {
+        boolean productExist = productRepository.existsById(productId);
+        if (!productExist) {
+            throw new ProductNotFoundException();
+        }
     }
 }
